@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/rect_check/__init__.py
+src/rect_check/__main__.py
+src/rect_check/cli.py
+src/rect_check/geometry.py
+src/rect_inside_polygon.egg-info/PKG-INFO
+src/rect_inside_polygon.egg-info/SOURCES.txt
+src/rect_inside_polygon.egg-info/dependency_links.txt
+src/rect_inside_polygon.egg-info/entry_points.txt
+src/rect_inside_polygon.egg-info/requires.txt
+src/rect_inside_polygon.egg-info/top_level.txt
+tests/test_geometry.py

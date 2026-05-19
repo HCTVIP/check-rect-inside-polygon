@@ -1,0 +1,65 @@
+Metadata-Version: 2.4
+Name: rect-inside-polygon
+Version: 1.0.0
+Summary: Check if a center-sized rectangle lies inside a polygon
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: opencv-python>=4.8
+Requires-Dist: numpy>=1.24
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+
+# Rect Inside Polygon (OpenCV)
+
+Kiểm tra hình chữ nhật (tâm + `w`, `h`) có nằm trong đa giác hay không — dùng **OpenCV**.
+
+Hệ tọa độ ảnh: gốc trên-trái, trục **y** tăng xuống dưới.
+
+## Cài đặt
+
+```bash
+cd c:\rect-inside-polygon
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[dev]"
+```
+
+Hoặc:
+
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+## Chạy
+
+```bash
+python -m rect_check --example
+
+python -m rect_check --center 210 275 --size 180 450 ^
+  --polygon "100,100 500,120 600,300 450,500 150,450" --mode full
+```
+
+## Chế độ (`--mode`)
+
+| Mode | OpenCV | Ý nghĩa |
+|------|--------|---------|
+| `center` | `cv2.pointPolygonTest` | Tâm nằm trong / trên cạnh đa giác |
+| `full` | `fillPoly` + mask | **Toàn bộ** hình chữ nhật trong vùng |
+| `overlap` | mask AND | Có **giao** với vùng |
+
+## Dùng trong code
+
+```python
+from rect_check import check
+
+polygon = [(100, 100), (500, 120), (600, 300), (450, 500), (150, 450)]
+ok = check(x_center=210, y_center=275, w=180, h=450, polygon=polygon, mode="full")
+print(ok)
+```
+
+## Test
+
+```bash
+python -m pytest tests/ -v
+```

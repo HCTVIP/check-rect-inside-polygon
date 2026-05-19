@@ -1,0 +1,2 @@
+[console_scripts]
+rect-check = rect_check.cli:main
