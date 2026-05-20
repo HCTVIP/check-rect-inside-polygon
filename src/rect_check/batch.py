@@ -10,10 +10,12 @@ import numpy as np
 from .geometry import (
     Polygon,
     RectanglePolygonResult,
+    classify_polygon_relation,
     looks_like_yolo_xyxy,
     polygon_to_contour,
     yolo_xyxy_to_center_size,
 )
+from .reporting import POLYGON_RELATION_MESSAGES
 
 Point = Tuple[float, float]
 
@@ -43,6 +45,8 @@ class ObjectResult(TypedDict, total=False):
     y2: float
     fully_inside: bool
     overlaps: bool
+    relation: str
+    relation_message: str
     error: str
 
 
@@ -216,6 +220,9 @@ def evaluate_batch(
             )
             row["fully_inside"] = ev["fully_inside"]
             row["overlaps"] = ev["overlaps"]
+            rel = classify_polygon_relation(ev["fully_inside"], ev["overlaps"])
+            row["relation"] = rel
+            row["relation_message"] = POLYGON_RELATION_MESSAGES[rel]
         except ValueError as e:
             row["error"] = str(e)
             row["fully_inside"] = False
@@ -230,7 +237,7 @@ def batch_summary(results: Sequence[ObjectResult]) -> dict:
     return {
         "total": len(results),
         "errors": sum(1 for r in results if "error" in r),
-        "fully_inside_count": sum(1 for r in ok if r.get("fully_inside")),
-        "overlaps_count": sum(1 for r in ok if r.get("overlaps")),
-        "no_overlap_count": sum(1 for r in ok if not r.get("overlaps")),
+        "inside_count": sum(1 for r in ok if r.get("relation") == "inside"),
+        "intersect_count": sum(1 for r in ok if r.get("relation") == "intersect"),
+        "outside_count": sum(1 for r in ok if r.get("relation") == "outside"),
     }

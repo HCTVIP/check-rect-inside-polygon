@@ -4,7 +4,26 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from .geometry import Polygon, RectanglePolygonResult, point_in_polygon, rect_corners
+from .geometry import (
+    Polygon,
+    PolygonRelation,
+    RectanglePolygonResult,
+    classify_polygon_relation,
+    point_in_polygon,
+    rect_corners,
+)
+
+POLYGON_RELATION_MESSAGES: dict[PolygonRelation, str] = {
+    "intersect": "Vật thể giao với Polygon",
+    "inside": "Vật thể nằm hoàn toàn bên trong polygon",
+    "outside": "Vật thể nằm hoàn toàn bên ngoài polygon",
+}
+
+
+def polygon_relation_message(fully_inside: bool, overlaps: bool) -> str:
+    """Một câu trả lời duy nhất trong ba đáp án."""
+    key = classify_polygon_relation(fully_inside, overlaps)
+    return POLYGON_RELATION_MESSAGES[key]
 
 
 def corner_details(
@@ -41,14 +60,7 @@ def print_rectangle_report(
     print(f"Từng góc trong vùng: {details['corners_inside']}")
     print(f"Tâm trong vùng: {details['center_inside']}")
     print()
-    print(
-        "1. Vật thể có nằm hoàn toàn trong Polygon (khu vực) không? "
-        f"{'CÓ' if result['fully_inside'] else 'KHÔNG'}"
-    )
-    print(
-        "2. Vật thể có giao với Polygon (khu vực) không? "
-        f"{'CÓ' if result['overlaps'] else 'KHÔNG'}"
-    )
+    print(polygon_relation_message(result["fully_inside"], result["overlaps"]))
 
 
 def _format_object_label(row: dict) -> str:
@@ -72,13 +84,11 @@ def print_batch_report(
         print(f"Polygon ({len(polygon)} đỉnh): {list(polygon)}")
     print(f"Số vật thể: {summary['total']}")
     print()
-    print(
-        f"  Trọn trong vùng: {summary['fully_inside_count']} vật thể"
-    )
-    print(f"  Có giao vùng:     {summary['overlaps_count']} vật thể")
-    print(f"  Không giao:       {summary['no_overlap_count']} vật thể")
+    print(f"  Giao với polygon:        {summary['intersect_count']}")
+    print(f"  Trọn bên trong polygon:  {summary['inside_count']}")
+    print(f"  Trọn bên ngoài polygon: {summary['outside_count']}")
     if summary.get("errors"):
-        print(f"  Lỗi:              {summary['errors']} vật thể")
+        print(f"  Lỗi:                     {summary['errors']}")
 
     if not results:
         return
@@ -86,6 +96,9 @@ def print_batch_report(
     if len(results) == 1:
         r = results[0]
         print()
+        if r.get("error"):
+            print(f"LỖI: {r['error']}")
+            return
         print_rectangle_report(
             r["x_center"],
             r["y_center"],
@@ -106,10 +119,9 @@ def print_batch_report(
         if row.get("error"):
             print(f"  {label}: LỖI — {row['error']}")
             continue
-        print(
-            f"  {label}: {_format_object_label(row)} → "
-            f"trọn={'CÓ' if row.get('fully_inside') else 'KHÔNG'}, "
-            f"giao={'CÓ' if row.get('overlaps') else 'KHÔNG'}"
+        msg = row.get("relation_message") or polygon_relation_message(
+            bool(row.get("fully_inside")), bool(row.get("overlaps"))
         )
+        print(f"  {label}: {_format_object_label(row)} → {msg}")
     if len(results) > n:
         print(f"  ... và {len(results) - n} vật thể nữa")

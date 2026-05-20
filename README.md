@@ -47,15 +47,16 @@ from rect_check.batch import evaluate_batch, object_from_yolo_xyxy, parse_object
 polygon = [(100, 100), (500, 120), (600, 300)]
 boxes = [{"x1": b["x1"], "y1": b["y1"], "x2": b["x2"], "y2": b["y2"]} for b in yolo_result["boxes"]]
 results = evaluate_batch(polygon, parse_objects(boxes))
-# fully_inside = trọn trong vùng nguy hiểm, overlaps = có giao (cảnh báo)
+# r["relation_message"] — một trong ba câu trên (cảnh báo thường dùng "giao" hoặc "trọn trong")
 ```
 
-### Kết quả
+### Kết quả (mỗi vật thể — **một** trong ba đáp án)
 
-1. Vật thể có **nằm hoàn toàn** trong polygon không?
-2. Vật thể có **giao** với polygon không?
+1. Vật thể giao với Polygon  
+2. Vật thể nằm hoàn toàn bên trong polygon  
+3. Vật thể nằm hoàn toàn bên ngoài polygon  
 
-Nhiều vật thể: tóm tắt + 10 dòng chi tiết đầu.
+Nhiều vật thể: tóm tắt theo ba loại + 10 dòng chi tiết đầu.
 
 ## Cấu trúc project
 

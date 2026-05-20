@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
-from typing import List, Sequence, Tuple, TypedDict
+from typing import List, Literal, Sequence, Tuple, TypedDict
+
+PolygonRelation = Literal["inside", "intersect", "outside"]
 
 import cv2
 import numpy as np
@@ -83,6 +85,21 @@ def rect_corners(x_center: float, y_center: float, w: float, h: float) -> List[P
         (x_center + half_w, y_center + half_h),
         (x_center - half_w, y_center + half_h),
     ]
+
+
+def classify_polygon_relation(fully_inside: bool, overlaps: bool) -> PolygonRelation:
+    """
+    Phân loại vật thể so với polygon — trả về đúng một trong ba.
+
+    - inside: nằm hoàn toàn bên trong
+    - intersect: giao một phần (không trọn trong)
+    - outside: hoàn toàn bên ngoài
+    """
+    if fully_inside:
+        return "inside"
+    if overlaps:
+        return "intersect"
+    return "outside"
 
 
 def point_in_polygon(point: Point, polygon: Polygon) -> bool:
